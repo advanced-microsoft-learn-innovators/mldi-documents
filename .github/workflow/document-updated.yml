@@ -1,0 +1,29 @@
+name: Document Updated
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/**"
+  workflow_dispatch:
+
+jobs:
+  document-updated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.MY_GITHUB_APP_ID }}
+          private_key: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
+      - name: Create Github dispatch event
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer ${{ steps.generate_token.outputs.token }}" \
+            -H "X-Github-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/Yuta-31/mldi-documents-view/dispatches \
+            -d '{"event_type": "document-updated"}'
